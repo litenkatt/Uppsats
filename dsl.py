@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import *
 
-# Constant index :: int
-i = 0
+# TOString :: Array -> Strings
+# Given an array xs returns a string of said Array
+to_string = lambda xs : str(xs)
 
 # SPLIT :: String -> [String]
 # Given a string, returns an array of strings divided by the blankspaces of the original string.
@@ -11,18 +12,6 @@ split = lambda s : s.split()
 # SIZE :: [String] -> int
 # Given an array, returns the number of elements in that array.
 size = lambda xs : len(xs)
-
-# INTCONVERT :: String -> int
-# Given a string, returns an int.
-intconvert = lambda s : int(s)
-
-# DECIMALCONVERT :: String -> decimal
-# Given a string, returns a decimal.
-decimalconvert = lambda s : Decimal(s)
-
-# DATECONVERT :: decimal -> datetime
-# Given a decimal d returns the a datetime object.
-dateconvert = lambda d : datetime.fromtimestamp(d)
 
 # LOWERCASE :: String -> String
 # Given a string s returns the string converted to all lowercase letters if applicable.
@@ -43,11 +32,29 @@ take = lambda n, xs : xs[:n]
 # (If the length of xs was no larger than n in the first place, an empty array is returned.)
 drop = lambda n, xs : xs[n:]
 
-# INSERT :: int -> String ->[String] -> String
-# Given an integer n, a String s, and an array xs, inserts s at the (n+1)-st position in xs, replacing the previous value if applicable.
-# (If the length of xs was less than or equal to n, the value NULL is returned instead).
-def insert(s, n, xs):
-    if n >= 0 and len(xs) > n : xs[n] = s
+# CONVERT_DATA :: [String] -> Array
+# Given an array of strings xs, returns an array of Strings, Integers, and or floats.
+def convert_data(xs):
+    for i in range(len(xs)):
+        e = xs[i]
+        if isinstance(e, str):
+            if e.isdigit():
+                xs[i] = int(e)
+                try:
+                    d = datetime.fromtimestamp(xs[i])
+                    dt = datetime.now()
+                    if d.year == dt.year and d.month == dt.month : xs[i] = d
+                except OSError: continue # print ("convert error at: " + str(i) + ", " + str(e))
+            else:
+                try: xs[i] = float(e)
+                except ValueError: continue
+    return xs
+
+# INSERT :: int -> [object] ->[String] -> [String]
+# Given an integer n, an object o or array, and an array xs, inserts s at the (n+1)-st position in xs, replacing the previous value if applicable
+# and returns the new xs. (If the length of xs was less than or equal to n, the value NULL is returned instead).
+def insert(o, n, xs):
+    if n >= 0 and len(xs) > n : xs[n] = o
     else : return None
     return xs
 
@@ -58,6 +65,8 @@ def switch(n1, n2, xs):
     insert(ACCESS(n2, xs), n1, xs)
     insert(t, n2, xs)
     return xs
+
+# BASIC MATH <not yet implemented>
 
 # ADD :: int -> int
 add = lambda n : n + 1
@@ -76,20 +85,42 @@ upraise = lambda n : n **2
 
 # DSL Method index
 method = {
-0: split,
-1: size,
-2: intconvert,
-3: decimalconvert,
-4: dateconvert,
-5: lowercase,
-6: get,
-7: take,
-8: drop,
-9: insert,
-10: switch,
-11: add,
-12: subtract,
-13: double,
-14: half,
-15: upraise
+0: to_string,
+1: split,
+2: size,
+3: lowercase,
+4: get,
+5: take,
+6: drop,
+7: convert_data,
+8: insert,
+9: switch,
 }
+
+# TESTING
+
+input = '00017 00209 1523779635 22.3 61 data3'
+print ('testing: ' + input)
+key = take(4, insert(drop(3, convert_data(split(input))), 3, convert_data(split(input))))
+print ('key: ' + str(key))
+# print (method[5](4, method[8](method[6](3, method[7](method[1](input))), 3, method[7](method[1](input)))))
+
+print ('\n')
+
+# split
+a = method[1](input)
+print ('a: ' + str(a))
+# convert_data
+b = method[7](a)
+print ('b: ' + str(b))
+# drop
+c = method[6](3, b)
+print ('c: ' + str(c))
+# insert
+d = method[8](c, 3, b)
+print ('d: ' + str(d))
+# take
+e = method[5](4, d)
+# result
+print ('e (result): ' + str(e) + '\n')
+print ('Correct!' if e == key else 'Incorrect!')
