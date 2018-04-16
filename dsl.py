@@ -20,7 +20,7 @@ lowercase = lambda s : s.decode('utf-8').lower()
 # GET :: int -> [String] -> String
 # Given an integer n and array xs, returns the (n+1)-st element of xs.
 # (If the length of xs was less than or equal to n, the value NULL is returned instead).
-get = lambda xs, n : xs[n] if n>=0 and len(xs)>n else None
+get = lambda xs, n : xs[n] if n >= 0 and len(xs) > n else None
 
 # TAKE :: int -> [String] -> [String]
 # Given an integer n and array xs, returns the array truncated after the n-th element.
@@ -44,7 +44,7 @@ def convert_data(xs):
                     d = datetime.fromtimestamp(xs[i])
                     dt = datetime.now()
                     if d.year == dt.year and d.month == dt.month : xs[i] = d
-                except OSError: continue # print ("convert error at: " + str(i) + ", " + str(e))
+                except OSError: continue
             else:
                 try: xs[i] = float(e)
                 except ValueError: continue
@@ -85,16 +85,16 @@ upraise = lambda n : n **2
 
 # DSL Method index
 method = {
-0: [to_string, 1],
-1: [split, 1],
-2: [size, 1],
-3: [lowercase, 1],
-4: [get, 2],
-5: [take, 2],
-6: [drop, 2],
-7: [convert_data, 1],
-8: [insert, 3],
-9: [switch, 3],
+0: [to_string, 1, 'Object'],
+1: [split, 1, 'String'],
+2: [size, 1, 'Object'],
+3: [lowercase, 1, 'String'],
+4: [get, 2, ['Array', 'int']],
+5: [take, 2, ['Array', 'int']],
+6: [drop, 2, ['Array', 'int']],
+7: [convert_data, 1, 'Array'],
+8: [insert, 3, ['Array', 'Object', 'int']],
+9: [switch, 3, ['Array', 'int', 'int']],
 }
 
 # TESTING
