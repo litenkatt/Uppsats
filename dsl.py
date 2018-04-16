@@ -20,17 +20,17 @@ lowercase = lambda s : s.decode('utf-8').lower()
 # GET :: int -> [String] -> String
 # Given an integer n and array xs, returns the (n+1)-st element of xs.
 # (If the length of xs was less than or equal to n, the value NULL is returned instead).
-get = lambda n, xs : xs[n] if n>=0 and len(xs)>n else None
+get = lambda xs, n : xs[n] if n>=0 and len(xs)>n else None
 
 # TAKE :: int -> [String] -> [String]
 # Given an integer n and array xs, returns the array truncated after the n-th element.
 # (If the length of xs was no larger than n in the first place, it is returned without modification.)
-take = lambda n, xs : xs[:n]
+take = lambda xs, n : xs[:n]
 
 # DROP :: int -> [String] -> [String]
 # Given an integer n and array xs, returns the array with the first n elements dropped.
 # (If the length of xs was no larger than n in the first place, an empty array is returned.)
-drop = lambda n, xs : xs[n:]
+drop = lambda xs, n : xs[n:]
 
 # CONVERT_DATA :: [String] -> Array
 # Given an array of strings xs, returns an array of Strings, Integers, and or floats.
@@ -53,17 +53,17 @@ def convert_data(xs):
 # INSERT :: int -> [object] ->[String] -> [String]
 # Given an integer n, an object o or array, and an array xs, inserts s at the (n+1)-st position in xs, replacing the previous value if applicable
 # and returns the new xs. (If the length of xs was less than or equal to n, the value NULL is returned instead).
-def insert(o, n, xs):
+def insert(xs, o, n):
     if n >= 0 and len(xs) > n : xs[n] = o
     else : return None
     return xs
 
 # SWITCH :: int -> int -> [int] -> [int]
 # Given two integers n1 and n2, and one array xs, returns an array with the elements of index n1 and n2 in switched places.
-def switch(n1, n2, xs):
-    t = get(n1, xs)
-    insert(ACCESS(n2, xs), n1, xs)
-    insert(t, n2, xs)
+def switch(xs, n1, n2):
+    t = get(xs, n1)
+    insert(xs, get(xs, n2), n1)
+    insert(xs, t, n2)
     return xs
 
 # BASIC MATH <not yet implemented>
@@ -85,42 +85,41 @@ upraise = lambda n : n **2
 
 # DSL Method index
 method = {
-0: to_string,
-1: split,
-2: size,
-3: lowercase,
-4: get,
-5: take,
-6: drop,
-7: convert_data,
-8: insert,
-9: switch,
+0: [to_string, 1],
+1: [split, 1],
+2: [size, 1],
+3: [lowercase, 1],
+4: [get, 2],
+5: [take, 2],
+6: [drop, 2],
+7: [convert_data, 1],
+8: [insert, 3],
+9: [switch, 3],
 }
 
 # TESTING
+def test_methods():
+    input = '10017 10209 1523779635 22.3 61 data3'
+    print ('testing: ' + input)
+    key = take(insert(convert_data(split(input)), drop(convert_data(split(input)), 3), 3), 4)
+    print ('key : ' + str(key))
+    # split
+    a = method[1][0](input)
+    print ('a : ' + str(a))
+    # convert_data
+    b = method[7][0](a)
+    print ('b : ' + str(b))
+    # drop
+    c = method[6][0](b, 3)
+    print ('c : ' + str(c))
+    # insert
+    d = method[8][0](b, c, 3)
+    print ('d : ' + str(d))
+    # take
+    e = method[5][0](d, 4)
+    # result
+    print ('e (result) : ' + str(e))
+    print ('Result == key : ' + str(e == key))
+    return e
 
-input = '00017 00209 1523779635 22.3 61 data3'
-print ('testing: ' + input)
-key = take(4, insert(drop(3, convert_data(split(input))), 3, convert_data(split(input))))
-print ('key: ' + str(key))
-# print (method[5](4, method[8](method[6](3, method[7](method[1](input))), 3, method[7](method[1](input)))))
-
-print ('\n')
-
-# split
-a = method[1](input)
-print ('a: ' + str(a))
-# convert_data
-b = method[7](a)
-print ('b: ' + str(b))
-# drop
-c = method[6](3, b)
-print ('c: ' + str(c))
-# insert
-d = method[8](c, 3, b)
-print ('d: ' + str(d))
-# take
-e = method[5](4, d)
-# result
-print ('e (result): ' + str(e) + '\n')
-print ('Correct!' if e == key else 'Incorrect!')
+#test_methods()
