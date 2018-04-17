@@ -66,6 +66,16 @@ def switch(xs, n1, n2):
     insert(xs, t, n2)
     return xs
 
+# MERGE :: list -> list -> int -> list
+# Given lists xs1 and xs2, returns a new list with xs2 inserted into the n-th position of xs1
+def merge(xs1, xs2, n):
+    output = []
+    for i in range(len(xs1)):
+        if i == n - 1:
+            output.append(xs2)
+        output.append(xs1[i])
+    return output
+
 # BASIC MATH <not yet implemented>
 
 # ADD :: int -> int
@@ -91,10 +101,11 @@ method = {
 3: [drop, 2, ['list', 'int'], 'list'],
 4: [convert_data, 1, ['list'], 'list'],
 5: [pack, 2, ['list', 'int'], 'list'],
-#6: [switch, 3, ['list', 'int', 'int'], 'list'],
-#7: [get, 2, ['list', 'int'], 'object'],
-#8: [size, 1, ['list'], 'int'],
-#9: [lowercase, 1, ['str'], 'str'],
+6: [lowercase, 1, ['str'], 'str'],
+#7: [merge, 3, ['list', 'list', 'int'], 'list']
+#7: [switch, 3, ['list', 'int', 'int'], 'list'],
+#8: [get, 2, ['list', 'int'], 'object'],
+#9: [size, 1, ['list'], 'int'],
 }
 
 # TESTING
