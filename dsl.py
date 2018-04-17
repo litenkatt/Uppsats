@@ -15,7 +15,7 @@ size = lambda xs : len(xs)
 
 # LOWERCASE :: String -> String
 # Given a string s returns the string converted to all lowercase letters if applicable.
-lowercase = lambda s : s.decode('utf-8').lower()
+lowercase = lambda s : s.lower()
 
 # GET :: int -> [String] -> String
 # Given an integer n and array xs, returns the (n+1)-st element of xs.
@@ -23,9 +23,9 @@ lowercase = lambda s : s.decode('utf-8').lower()
 get = lambda xs, n : xs[n] if n >= 0 and len(xs) > n else None
 
 # TAKE :: int -> [String] -> [String]
-# Given an integer n and array xs, returns the array truncated after the n-th element.
+# Given an integer n and array xs, returns the array truncated after the (n+1)-st element.
 # (If the length of xs was no larger than n in the first place, it is returned without modification.)
-take = lambda xs, n : xs[:n]
+take = lambda xs, n : xs[:(n + 1)]
 
 # DROP :: int -> [String] -> [String]
 # Given an integer n and array xs, returns the array with the first n elements dropped.
@@ -53,8 +53,8 @@ def convert_data(xs):
 # INSERT :: int -> [object] ->[String] -> [String]
 # Given an integer n, an object o or array, and an array xs, inserts s at the (n+1)-st position in xs, replacing the previous value if applicable
 # and returns the new xs. (If the length of xs was less than or equal to n, the value NULL is returned instead).
-def insert(xs, o, n):
-    if n >= 0 and len(xs) > n : xs[n] = o
+def pack(xs, n):
+    if n >= 0 and len(xs) > n : xs[n] = drop(xs, n)
     else : return None
     return xs
 
@@ -85,38 +85,35 @@ upraise = lambda n : n **2
 
 # DSL Method index
 method = {
-0: [to_string, 1, 'Object'],
-1: [split, 1, 'String'],
-2: [size, 1, 'Object'],
-3: [lowercase, 1, 'String'],
-4: [get, 2, ['Array', 'int']],
-5: [take, 2, ['Array', 'int']],
-6: [drop, 2, ['Array', 'int']],
-7: [convert_data, 1, 'Array'],
-8: [insert, 3, ['Array', 'Object', 'int']],
-9: [switch, 3, ['Array', 'int', 'int']],
+0: [to_string, 1, ['list'], 'str'],
+1: [split, 1, ['str'], 'list'],
+2: [take, 2, ['list', 'int'], 'list'],
+3: [drop, 2, ['list', 'int'], 'list'],
+4: [convert_data, 1, ['list'], 'list'],
+5: [pack, 2, ['list', 'int'], 'list'],
+#6: [switch, 3, ['list', 'int', 'int'], 'list'],
+#7: [get, 2, ['list', 'int'], 'object'],
+#8: [size, 1, ['list'], 'int'],
+#9: [lowercase, 1, ['str'], 'str'],
 }
 
 # TESTING
 def test_methods():
     input = '10017 10209 1523779635 22.3 61 data3'
     print ('testing: ' + input)
-    key = take(insert(convert_data(split(input)), drop(convert_data(split(input)), 3), 3), 4)
+    key = take(insert(convert_data(split(input)), drop(convert_data(split(input)), 3), 3), 3)
     print ('key : ' + str(key))
     # split
     a = method[1][0](input)
     print ('a : ' + str(a))
     # convert_data
-    b = method[7][0](a)
+    b = method[4][0](a)
     print ('b : ' + str(b))
-    # drop
-    c = method[6][0](b, 3)
-    print ('c : ' + str(c))
-    # insert
-    d = method[8][0](b, c, 3)
+    # pack
+    d = method[5][0](b, 3)
     print ('d : ' + str(d))
     # take
-    e = method[5][0](d, 4)
+    e = method[2][0](d, 3)
     # result
     print ('e (result) : ' + str(e))
     print ('Result == key : ' + str(e == key))
