@@ -163,7 +163,8 @@ def run(base, method):
 def measure(method):
     t = time.clock()
     run(input, method)
-    return time.clock() - t
+    t_delta = time.clock() - t
+    return [len(method), t_delta, 100 - (len(method) * t_delta * 100000)]
 ###################################################################################################
 
 ### FIND PREVIOUS PROGRAM
@@ -191,7 +192,7 @@ for t in range(len(test_pairs)):
     if programs[t] is None : continue
 
     print(test_pairs[t][0])
-    print(str(programs[t][0]) + ', ' + str(len(programs[t][0])) + ' steps, ' + str("%.3f" % (programs[t][1] * 100000)) + 'ms')
+    print(str(programs[t][0]) + ', ' + str(programs[t][1][0]) + ' steps, ' + str("%.2f" % (programs[t][1][1] * 100000)) + 'ms, score: ' + str("%.2f" % programs[t][1][2]))
 
     run(test_pairs[t][0], programs[t][0])
 
