@@ -43,7 +43,7 @@ def convert_data(xs):
                 try:
                     d = datetime.fromtimestamp(xs[i])
                     dt = datetime.now()
-                    if d.year == dt.year and d.month == dt.month : xs[i] = d
+                    if dt.year - d.year <= 1 and (dt.month - d.month <= 1 or dt.month - d.month == 11) : xs[i] = d
                 except OSError: continue
             else:
                 try: xs[i] = float(e)
