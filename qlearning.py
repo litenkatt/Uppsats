@@ -3,8 +3,11 @@ import numpy
 from datetime import datetime
 import editdistance # HAS TO BE INSTALLED SEPARATELY: pip3 install editdistance
 import time
+from timeit import default_timer as timer
+from timeit import timeit
 
 ### SET UP GLOBAL VARIABLES
+program_dictionary = {}
 num_methods = len(dsl.method)
 max_tries = 20
 
@@ -12,9 +15,7 @@ R = []
 for i in range(num_methods):
     R.append([])
     for j in range(num_methods):
-        #if j != 0 and i != j and dsl.method[i][3] == dsl.method[j][2][0]: R[i].append(j)
         if i != j and dsl.method[i][3] == dsl.method[j][2][0]: R[i].append(j)
-        #if dsl.method[i][3] == dsl.method[j][2][0]: R[i].append(j)
 
 Q = numpy.zeros([num_methods, num_methods])
 g = 0.8
@@ -41,6 +42,8 @@ compare = lambda r : 100 - editdistance.eval(str(r), str(output))
 def score(result):
     if result == output : return 100
     if result is None : return -1
+    s = compare(result)
+    if s < 0 : return 0
     return compare(result)
 ###################################################################################################
 
@@ -137,7 +140,7 @@ def route(input, output):
             q_progress[i][last_action] = 0
         q_progress[last_action,] = 0
 
-        print(str(next_step_index) + '>>') # '(' + dsl.method[next_step_index][0].__name__ + ')' '>>')
+        print(str(next_step_index) + '>>')
         last_action = next_step_index
 
         if len(route) > max_tries:
@@ -146,7 +149,7 @@ def route(input, output):
     print('Input:\n' + str(input))
     print('Selected path:\n' + str(route))
     print('Result:\n' + str(current_state()) + '\n')
-    return [route, measure(route)]
+    return [route, avg_time(route, 1000000)]
 ###################################################################################################
 
 ### RUN METHOD
@@ -160,18 +163,40 @@ def run(base, method):
 ###################################################################################################
 
 ### TIME METHOD
-def measure(method):
-    t = time.clock()
-    run(input, method)
-    t_delta = time.clock() - t
-    return [len(method), t_delta, 100 - (len(method) * t_delta * 100000)]
+avg_time = lambda method, iterations : timeit(run(input, method), number=iterations) / iterations
+###################################################################################################
+
+### KEY FROM INPUT
+def comparison_key(input):
+    key = [len(input)]
+    for i in range(len(input)):
+        if input[i] == " " : key.append(i)
+    return key
 ###################################################################################################
 
 ### FIND PREVIOUS PROGRAM
+list_types = lambda i : find_types(i) if isinstance(i, list) else type(i)
+def find_types(list):
+    r = []
+    for i in list:
+        r.append(list_types(i))
+    return r
 
-#def search(io_pair):
+def search(input):
+    key = comparison_key(input)
+    if key in program_dictionary:
+        if find_types(program_dictionary[key)[0] == type(list): return program_dictionary[key][0]
+        return program_dictionary[input]
 
+    comparisons = sorted(reverse=True)#[]
+    for k, p in program_dictionary.items():#sorted(program_dictionary):
+        likeness = abs(key[0] - p[0]) + abs(len(key) - len(p))
+        comparisons.append(likeness, p)
 
+    print(comparisons)
+    #input_likeness = editdistance.eval(str(io_pair[0]), str())
+    #print(list_types(test_pairs[0][0]))
+    #print(list_types(test_pairs[0][1]))
 ###################################################################################################
 
 ### RUN TESTS
@@ -182,19 +207,28 @@ test_pairs = [
 ]
 
 programs = []
-
 for i in range(len(test_pairs)):
+    print(comparison_key(test_pairs[i][0]))
     print('Test[' + str(i + 1) + ']:')
-    programs.append(train(test_pairs[i][0], test_pairs[i][1], 3000, 10))
+
+    try:
+        program_dictionary[tuple(comparison_key(test_pairs[i][0]))] = tuple(train(test_pairs[i][0], test_pairs[i][1], 3000, 10))
+    except TypeError: continue
+    #programs.append(train(test_pairs[i][0], test_pairs[i][1], 3000, 10))
 
 print('Testing programs:')
-for t in range(len(test_pairs)):
-    if programs[t] is None : continue
+for t in test_pairs:
+    print(t[0])
+    key = tuple(comparison_key(t[0]))
+    #if programs[t] is None :
+    if key not in program_dictionary:
+        print('Program failure\n')
+        continue
 
-    print(test_pairs[t][0])
-    print(str(programs[t][0]) + ', ' + str(programs[t][1][0]) + ' steps, ' + str("%.2f" % (programs[t][1][1] * 100000)) + 'ms, score: ' + str("%.2f" % programs[t][1][2]))
+    #print(str(programs[t][0]) + ', ' + str(len(programs[t][0])) + ' steps, ' + str("%.2f" % (programs[t][1] * 100000000)) + 'ns')
+    print(str(program_dictionary[key][0]) + ', ' + str(len(program_dictionary[key][0])) + ' steps, ' + str("%.2f" % (program_dictionary[key][1] * 100000000)) + 'ns')
 
-    run(test_pairs[t][0], programs[t][0])
+    run(t[0], program_dictionary[key][0])
 
     print(str(current_state()))
     print()
