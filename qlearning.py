@@ -111,7 +111,19 @@ def train(new_in, new_out, iterations, max_steps):
 
     print("Trained Q matrix:")
     print(Q)
-    return route(new_in, new_out)
+
+    rt = route(new_in, new_out)
+    if rt != None:
+        key = comparison_key(new_in)
+        if key not in program_dictionary:
+            program_dictionary[key] = [rt]
+        else:
+            if rt not in program_dictionary[key]:
+                for i in range(len(program_dictionary[key])):
+                    if len(rt) < len(program_dictionary[key][i]):
+                        program_dictionary[key].insert(i, rt)
+
+    return rt
 ###################################################################################################
 
 ### FIND ROUTE BETWEEN INPUT -> OUTPUT
@@ -139,8 +151,6 @@ def route(input, output):
         for i in range(num_methods):
             q_progress[i][last_action] = 0
         q_progress[last_action,] = 0
-
-        print(str(next_step_index) + '>>')
         last_action = next_step_index
 
         if len(route) > max_tries:
@@ -149,21 +159,24 @@ def route(input, output):
     print('Input:\n' + str(input))
     print('Selected path:\n' + str(route))
     print('Result:\n' + str(current_state()) + '\n')
-    return [route, avg_time(route, 1000000)]
+    return route
 ###################################################################################################
 
 ### RUN METHOD
-
-def run(base, method):
-    init(base, output)
+def run_specific(base, method):
+    init(base, None)
     for m in method:
         state.append(dsl_method(m))
-    return current_state
+    return current_state()
+
+def run(base):
+    return run_specific(base, search(base))
 
 ###################################################################################################
 
 ### TIME METHOD
-avg_time = lambda method, iterations : timeit(run(input, method), number=iterations) / iterations
+time_run = lambda input, method, iterations : timeit(lambda: run_specific(input, method), number=iterations) / iterations
+time_search = lambda input, iterations : timeit(lambda: run(input), number=iterations) / iterations
 ###################################################################################################
 
 ### KEY FROM INPUT
@@ -171,7 +184,7 @@ def comparison_key(input):
     key = [len(input)]
     for i in range(len(input)):
         if input[i] == " " : key.append(i)
-    return key
+    return tuple(key)
 ###################################################################################################
 
 ### FIND PREVIOUS PROGRAM
@@ -185,18 +198,35 @@ def find_types(list):
 def search(input):
     key = comparison_key(input)
     if key in program_dictionary:
-        if find_types(program_dictionary[key)[0] == type(list): return program_dictionary[key][0]
-        return program_dictionary[input]
+        return program_dictionary[key][0]
 
-    comparisons = sorted(reverse=True)#[]
-    for k, p in program_dictionary.items():#sorted(program_dictionary):
-        likeness = abs(key[0] - p[0]) + abs(len(key) - len(p))
-        comparisons.append(likeness, p)
+    comparisons = []
+    for k, li in program_dictionary.items():
+        if isinstance(li[0], list):
+            for p in li:
+                difference = abs(key[0] - k[0]) + abs(len(key) - len(k)) + len(key) - len(set(key).intersection(k))
+                if len(comparisons) < 1:
+                    comparisons.append([difference, p])
+                else:
+                    for i in range(len(comparisons)):
+                        if difference < comparisons[i][0]:
+                            comparisons.insert(i, [difference, p])
+                            break
+        else:
+            difference = abs(key[0] - k[0]) + abs(len(key) - len(k)) + len(key) - len(set(key).intersection(k))
+            if len(comparisons) < 1:
+                comparisons.append([difference, li])
+            else:
+                for i in range(len(comparisons)):
+                    if difference < comparisons[i][0]:
+                        comparisons.insert(i, [difference, li])
+                        break
 
-    print(comparisons)
-    #input_likeness = editdistance.eval(str(io_pair[0]), str())
-    #print(list_types(test_pairs[0][0]))
-    #print(list_types(test_pairs[0][1]))
+    for p in comparisons:
+        if run_specific(t[0], p[1]) != None:
+            return p[1]
+
+    return None
 ###################################################################################################
 
 ### RUN TESTS
@@ -206,30 +236,33 @@ test_pairs = [
     ['10017 10209 22.3 61', [10017, 10209, 22.3, [61]]],
 ]
 
-programs = []
 for i in range(len(test_pairs)):
     print(comparison_key(test_pairs[i][0]))
     print('Test[' + str(i + 1) + ']:')
-
-    try:
-        program_dictionary[tuple(comparison_key(test_pairs[i][0]))] = tuple(train(test_pairs[i][0], test_pairs[i][1], 3000, 10))
-    except TypeError: continue
-    #programs.append(train(test_pairs[i][0], test_pairs[i][1], 3000, 10))
+    train(test_pairs[i][0], test_pairs[i][1], 3000, 10)
 
 print('Testing programs:')
 for t in test_pairs:
+    print('Input:')
     print(t[0])
-    key = tuple(comparison_key(t[0]))
-    #if programs[t] is None :
-    if key not in program_dictionary:
+
+    program = search(t[0])
+
+    if program == None:
         print('Program failure\n')
         continue
 
-    #print(str(programs[t][0]) + ', ' + str(len(programs[t][0])) + ' steps, ' + str("%.2f" % (programs[t][1] * 100000000)) + 'ns')
-    print(str(program_dictionary[key][0]) + ', ' + str(len(program_dictionary[key][0])) + ' steps, ' + str("%.2f" % (program_dictionary[key][1] * 100000000)) + 'ns')
+    print('Output:')
+    print(run(t[0]))
 
-    run(t[0], program_dictionary[key][0])
-
-    print(str(current_state()))
+    print('Program used:')
+    print(str(program) + ', ' + str(len(program)) + ' steps')
+    print('Time:')
+    print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
     print()
+
+print(program_dictionary)
+print(run('10017 10209 1523779635 22.3 612 data3 data4'))
+print(search('10017 10209 1523779635 22.3 612 data3 data4'))
+print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
 ###################################################################################################
