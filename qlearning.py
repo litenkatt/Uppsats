@@ -136,9 +136,9 @@ def route(input, output):
     last_action = 0
     while current_state() != output:
         try:
-            next_step_index = numpy.where(Q[last_action] == numpy.max(q_progress[last_action]))[1]
+            next_step_index = numpy.where(q_progress[last_action] == numpy.max(q_progress[last_action]))[1]
         except IndexError:
-            next_step_index = numpy.where(Q[last_action] == numpy.max(q_progress[last_action]))[0]
+            next_step_index = numpy.where(q_progress[last_action] == numpy.max(q_progress[last_action]))[0]
 
         if next_step_index.shape[0] > 1:
             next_step_index = int(numpy.random.choice(next_step_index, size = 1))
@@ -232,15 +232,15 @@ def search(input):
 ### RUN TESTS
 test_pairs = [
     ['10017 10209 1523779635 22.3 61 data3', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
-    #['10017 10209 1523779635 22.3 61 data3 data4 17', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3', 'data4', 17]]],
-    #['10017 10209 22.3 61', [10017, 10209, 22.3, [61]]],
-    ['#10017 10209 1523779635 22.3 61 data3', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
+    ['10017 10209 1523779635 22.3 61 data3 data4 17', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3', 'data4', 17]]],
+    ['10017 10209 22.3 61', [10017, 10209, 22.3, [61]]],
+    ['#10017 10209 1523779635 22.3 61 data3', ['#10017', 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
     ['id="10017" node_id="10209" datetime="1523779635" temp="22.3" humidity="61" label="data3"', [['id', 10017], ['node_id', 10209], ['datetime', datetime(2018, 4, 15, 10, 7, 15)], [['temp', 22.3], ['humidity', 61], ['label', 'data3']]]],
 ]
 
 for i in range(len(test_pairs)):
     print('Test[' + str(i + 1) + ']:')
-    train(test_pairs[i][0], test_pairs[i][1], 5000, num_methods)
+    train(test_pairs[i][0], test_pairs[i][1], 10000, num_methods)
 
 print()
 print('Testing programs:')
@@ -260,7 +260,7 @@ for t in test_pairs:
     print('Program used:')
     print(str(program) + ', ' + str(len(program)) + ' steps')
     print('Time:')
-    print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
+    print(str("%.2f" % (time_search(t[0], 10000) * 30000)) + 'us')
     print()
 
 print(program_dictionary)
