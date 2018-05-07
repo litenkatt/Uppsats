@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import *
+from re import compile
 
 # TOString :: Array -> Strings
 # Given an array xs returns a string of said Array
@@ -31,10 +32,12 @@ take = lambda xs, n : xs[:(n + 1)]
 # Given an integer n and array xs, returns the array with the first n elements dropped.
 # (If the length of xs was no larger than n in the first place, an empty array is returned.)
 drop = lambda xs, n : xs[n:]
+drop_char = lambda s : s[1:]
 
 # CONVERT_DATA :: [String] -> Array
 # Given an array of strings xs, returns an array of Strings, Integers, and or floats.
 def convert_data(xs):
+    type_format = compile('.*=".*"')
     for i in range(len(xs)):
         e = xs[i]
         if isinstance(e, str):
@@ -46,6 +49,11 @@ def convert_data(xs):
                     if dt.year - d.year <= 1 and (dt.month - d.month <= 1 or dt.month - d.month == 11) : xs[i] = d
                 except OSError: continue
             else:
+                if type_format.match(e) is not None:
+                    #print(e)
+                    s = e.split('="')
+                    xs[i] = convert_data([s[0], (s[1])[:len(s[1]) - 2]])
+                    #print(xs[i])
                 try: xs[i] = float(e)
                 except ValueError: continue
     return xs
@@ -102,6 +110,7 @@ method = {
 4: [convert_data, 1, ['list'], 'list'],
 5: [pack, 2, ['list', 'int'], 'list'],
 6: [lowercase, 1, ['str'], 'str'],
+7: [drop_char, 1, ['str'], 'str']
 #7: [merge, 3, ['list', 'list', 'int'], 'list']
 #7: [switch, 3, ['list', 'int', 'int'], 'list'],
 #8: [get, 2, ['list', 'int'], 'object'],
