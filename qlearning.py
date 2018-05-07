@@ -232,15 +232,17 @@ def search(input):
 ### RUN TESTS
 test_pairs = [
     ['10017 10209 1523779635 22.3 61 data3', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
-    ['10017 10209 1523779635 22.3 61 data3 data4 17', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3', 'data4', 17]]],
-    ['10017 10209 22.3 61', [10017, 10209, 22.3, [61]]],
+    #['10017 10209 1523779635 22.3 61 data3 data4 17', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3', 'data4', 17]]],
+    #['10017 10209 22.3 61', [10017, 10209, 22.3, [61]]],
+    ['#10017 10209 1523779635 22.3 61 data3', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
+    ['id="10017" node_id="10209" datetime="1523779635" temp="22.3" humidity="61" label="data3"', [['id', 10017], ['node_id', 10209], ['datetime', datetime(2018, 4, 15, 10, 7, 15)], [['temp', 22.3], ['humidity', 61], ['label', 'data3']]]],
 ]
 
 for i in range(len(test_pairs)):
-    print(comparison_key(test_pairs[i][0]))
     print('Test[' + str(i + 1) + ']:')
-    train(test_pairs[i][0], test_pairs[i][1], 3000, 10)
+    train(test_pairs[i][0], test_pairs[i][1], 5000, num_methods)
 
+print()
 print('Testing programs:')
 for t in test_pairs:
     print('Input:')
@@ -262,7 +264,10 @@ for t in test_pairs:
     print()
 
 print(program_dictionary)
-print(run('10017 10209 1523779635 22.3 612 data3 data4'))
-print(search('10017 10209 1523779635 22.3 612 data3 data4'))
-print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
+try:
+    print(run('10017 10209 1523779635 22.3 612 data3 data4'))
+    print(search('10017 10209 1523779635 22.3 612 data3 data4'))
+    print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
+except TypeError:
+    print('No program found')
 ###################################################################################################
