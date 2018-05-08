@@ -10,19 +10,6 @@ to_string = lambda xs : str(xs)
 # Given a string, returns an array of strings divided by the blankspaces of the original string.
 split = lambda s : s.split()
 
-# SIZE :: [String] -> int
-# Given an array, returns the number of elements in that array.
-size = lambda xs : len(xs)
-
-# LOWERCASE :: String -> String
-# Given a string s returns the string converted to all lowercase letters if applicable.
-lowercase = lambda s : s.lower()
-
-# GET :: int -> [String] -> String
-# Given an integer n and array xs, returns the (n+1)-st element of xs.
-# (If the length of xs was less than or equal to n, the value NULL is returned instead).
-get = lambda xs, n : xs[n] if n >= 0 and len(xs) > n else None
-
 # TAKE :: int -> [String] -> [String]
 # Given an integer n and array xs, returns the array truncated after the (n+1)-st element.
 # (If the length of xs was no larger than n in the first place, it is returned without modification.)
@@ -43,15 +30,23 @@ def convert_data(xs):
         e = xs[i]
         if isinstance(e, str):
             if e.isdigit():
+                try:
+                    if len(e) == 8:
+                        xs[i] = datetime.strptime(e, '%Y%m%d')
+                        continue
+                    elif len(e) == 6:
+                        xs[i] = datetime.strptime(e, '%y%m%d')
+                        continue
+                except ValueError: pass
                 xs[i] = int(e)
                 try:
                     d = datetime.fromtimestamp(xs[i])
                     dt = datetime.now()
-                    if dt.year - d.year <= 1 and (dt.month - d.month <= 1 or dt.month - d.month == 11) : xs[i] = d
+                    if dt.year - d.year <= 1 and (dt.month - d.month <= 1 or dt.month - d.month == 11):
+                        xs[i] = d
                 except OSError: continue
             else:
                 if type_format[0].match(e) is not None or type_format[1].match(e) is not None:
-                    #s = re.split('=|\"|:', str(e))
                     s = list(filter(None, re.split('=|\"|:', e)))
                     xs[i] = convert_data([s[0], s[1]])
 
@@ -59,6 +54,10 @@ def convert_data(xs):
                 try: xs[i] = float(e)
                 except ValueError: continue
     return xs
+
+# ADD_DATE :: List -> int -> list_types
+# Given a list xs and integer i, returns xs with the current datetime added to the (i-1)-st positionself.
+add_date = lambda xs, i: (xs, xs.insert(i - 1, datetime.now()))[0]
 
 # INSERT :: int -> [object] ->[String] -> [String]
 # Given an integer n, an object o or array, and an array xs, inserts s at the (n+1)-st position in xs, replacing the previous value if applicable
@@ -68,78 +67,12 @@ def pack(xs, n):
     else : return None
     return xs
 
-# SWITCH :: int -> int -> [int] -> [int]
-# Given two integers n1 and n2, and one array xs, returns an array with the elements of index n1 and n2 in switched places.
-def switch(xs, n1, n2):
-    t = get(xs, n1)
-    insert(xs, get(xs, n2), n1)
-    insert(xs, t, n2)
-    return xs
-
-# MERGE :: list -> list -> int -> list
-# Given lists xs1 and xs2, returns a new list with xs2 inserted into the n-th position of xs1
-def merge(xs1, xs2, n):
-    output = []
-    for i in range(len(xs1)):
-        if i == n - 1:
-            output.append(xs2)
-        output.append(xs1[i])
-    return output
-
-# BASIC MATH <not yet implemented>
-
-# ADD :: int -> int
-add = lambda n : n + 1
-
-# SUBTRACT :: int -> int
-subtract = lambda n : n - 1
-
-# DOUBLE :: int -> int
-double = lambda n : n * 2
-
-# HALF :: int -> int
-half = lambda n : n / 2
-
-# UPRAISE :: int -> int
-upraise = lambda n : n **2
-
 # DSL Method index
 method = {
-0: [to_string, 1, ['list'], 'str'],
-1: [split, 1, ['str'], 'list'],
-2: [take, 2, ['list', 'int'], 'list'],
-3: [drop, 2, ['list', 'int'], 'list'],
-4: [convert_data, 1, ['list'], 'list'],
-5: [pack, 2, ['list', 'int'], 'list'],
-6: [lowercase, 1, ['str'], 'str'],
-#7: [drop_char, 1, ['str'], 'str'],
-#8: [drop_char_in_list, 1, ['list'], 'str'],
-#9: [merge, 3, ['list', 'list', 'int'], 'list']
-#10: [switch, 3, ['list', 'int', 'int'], 'list'],
-#11: [get, 2, ['list', 'int'], 'object'],
-#12: [size, 1, ['list'], 'int'],
+0: [to_string, ['list'], 'str'],
+1: [split, ['str'], 'list'],
+2: [take, ['list', 'int'], 'list'],
+3: [drop, ['list', 'int'], 'list'],
+4: [convert_data, ['list'], 'list'],
+5: [pack, ['list', 'int'], 'list'],
 }
-
-# TESTING
-def test_methods():
-    input = '10017 10209 1523779635 22.3 61 data3'
-    print ('testing: ' + input)
-    key = take(insert(convert_data(split(input)), drop(convert_data(split(input)), 3), 3), 3)
-    print ('key : ' + str(key))
-    # split
-    a = method[1][0](input)
-    print ('a : ' + str(a))
-    # convert_data
-    b = method[4][0](a)
-    print ('b : ' + str(b))
-    # pack
-    d = method[5][0](b, 3)
-    print ('d : ' + str(d))
-    # take
-    e = method[2][0](d, 3)
-    # result
-    print ('e (result) : ' + str(e))
-    print ('Result == key : ' + str(e == key))
-    return e
-
-#test_methods()
