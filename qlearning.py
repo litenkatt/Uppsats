@@ -15,7 +15,7 @@ R = []
 for i in range(num_methods):
     R.append([])
     for j in range(num_methods):
-        if i != j and dsl.method[i][3] == dsl.method[j][2][0]: R[i].append(j)
+        if i != j and dsl.method[i][2] == dsl.method[j][1][0]: R[i].append(j)
 
 Q = numpy.zeros([num_methods, num_methods])
 g = 0.8
@@ -49,7 +49,7 @@ def score(result):
 
 ### RUN A SINGLE METHOD FROM THE DSL AND RETURN THE RESULT
 def dsl_method(method):
-    attribute_type = [*dsl.method[method][2]]
+    attribute_type = [*dsl.method[method][1]]
     attributes = []
 
     for i in attribute_type:
@@ -233,14 +233,16 @@ def search(input):
 test_pairs = [
     ['10017 10209 1523779635 22.3 61 data3', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
     ['10017 10209 1523779635 22.3 61 data3 data4 17', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3', 'data4', 17]]],
-    ['10017 10209 22.3 61', [10017, 10209, 22.3, [61]]],
+    ['10017 10209 22.3 61', [10017, 10209, datetime.now(), [22.3,61]]],
     ['#10017 10209 1523779635 22.3 61 data3', ['#10017', 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
     ['id="10017" node_id="10209" datetime="1523779635" temp="22.3" humidity="61" label="data3"', [['id', 10017], ['node_id', 10209], ['datetime', datetime(2018, 4, 15, 10, 7, 15)], [['temp', 22.3], ['humidity', 61], ['label', 'data3']]]],
+    ['10017 10209 61', [10017, 10209, datetime.now(), [61]]],
+    ['id=10017 node=10209 datetime=180508 data=61', [10017, 10209, datetime(2018, 5, 8, 0, 0, 0), [61]]],
 ]
 
 for i in range(len(test_pairs)):
     print('Test[' + str(i + 1) + ']:')
-    train(test_pairs[i][0], test_pairs[i][1], 10000, num_methods)
+    train(test_pairs[i][0], test_pairs[i][1], 3000, num_methods)
 
 print()
 print('Testing programs:')
@@ -254,20 +256,39 @@ for t in test_pairs:
         print('Program failure\n')
         continue
 
-    print('Output:')
+    print('Result:')
     print(run(t[0]))
-
     print('Program used:')
     print(str(program) + ', ' + str(len(program)) + ' steps')
     print('Time:')
-    print(str("%.2f" % (time_search(t[0], 10000) * 30000)) + 'us')
+    print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
     print()
 
+print('Final program dictionary:')
 print(program_dictionary)
+print()
+print('Test search:')
 try:
-    print(run('10017 10209 1523779635 22.3 612 data3 data4'))
-    print(search('10017 10209 1523779635 22.3 612 data3 data4'))
-    print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
+    s_test = [
+    'id=10017 node=10209 datetime=180508 data=61',
+    'id=10234 node=10208 datetime=180507 data=72',
+    'id=10015 node=10209 datetime=180417 data=102',
+    'id=1002 node=102 datetime=160924 data=214',
+    '10017 10209 1523779635 22.3 61 data3',
+    '10019 10314 1523779635 19.4 52 dataX',
+    '100 1020 1523779635 21.42 67 data3 data4',
+    ]
+    for i in s_test:
+        print()
+        print('Input:')
+        print(str(i))
+        print('Result:')
+        print(run(i))
+        print('Program used:')
+        p = search(i)
+        print(str(p) + ', ' + str(len(p)) + ' steps')
+        print('Time:')
+        print(str("%.2f" % (time_search(i, 1000) * 100000)) + 'us')
 except TypeError:
     print('No program found')
 ###################################################################################################
