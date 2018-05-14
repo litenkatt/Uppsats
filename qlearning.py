@@ -5,6 +5,7 @@ import editdistance # HAS TO BE INSTALLED SEPARATELY: pip3 install editdistance
 import time
 from timeit import default_timer as timer
 from timeit import timeit
+from collections import Counter
 
 ### SET UP GLOBAL VARIABLES
 program_dictionary = {}
@@ -15,7 +16,7 @@ R = []
 for i in range(num_methods):
     R.append([])
     for j in range(num_methods):
-        if i != j and dsl.method[i][2] == dsl.method[j][1][0]: R[i].append(j)
+        if i != j and (dsl.method[i][2] == dsl.method[j][1][0] or i == 0): R[i].append(j)
 
 Q = numpy.zeros([num_methods, num_methods])
 g = 0.8
@@ -41,10 +42,11 @@ sample_action = lambda i : int(numpy.random.choice(R[i], 1))
 compare = lambda r : 100 - editdistance.eval(str(r), str(output))
 def score(result):
     if result == output : return 100
-    if result is None : return -1
-    s = compare(result)
+    if result is None : return 0
+    types = [list_types(result), list_types(output)]
+    s = compare(result) - editdistance.eval(str(types[0]), str(types[1])) / (len(types[0]) + len(types[1]))
     if s < 0 : return 0
-    return compare(result)
+    return s
 ###################################################################################################
 
 ### RUN A SINGLE METHOD FROM THE DSL AND RETURN THE RESULT
@@ -53,7 +55,7 @@ def dsl_method(method):
     attributes = []
 
     for i in attribute_type:
-        if len(attributes) > len(attribute_type) : break
+        if len(attributes) == len(attribute_type) : break
         if i == 'int':
             attributes.append(3)
             continue
@@ -81,28 +83,25 @@ def update(last_action, next_action, gamma):
     max_value = Q[next_action, max_index]
 
     qs = score(dsl_method(next_action))
-    if qs == -1 : return
+    if qs == -1 : return -1
     Q[last_action, next_action] = qs + gamma * max_value
+    return qs
 ###################################################################################################
 
 #### TRAIN THE Q-TABLE
-def learn(iterations, max_tries):
-    global state
-
-    for i in range(iterations):
-        state = [input]
-        last_action = 0
-
-        for j in range(max_tries):
-            next_action = sample_action(last_action)
-            update(last_action, next_action, g)
-            last_action = next_action
-
 def train(new_in, new_out, iterations, max_steps):
     global Q
+    global state
     init(new_in, new_out)
 
-    learn(iterations, max_steps)
+    for i in range(iterations):
+        state = [input.copy()]
+        last_action = 0
+        for j in range(max_steps):
+                next_action = sample_action(last_action)
+                if update(last_action, next_action, g) == -1: break
+                last_action = next_action
+
     Q = Q / numpy.max(Q) * 100
 
     for i in range(len(Q)):
@@ -122,7 +121,8 @@ def train(new_in, new_out, iterations, max_steps):
                 for i in range(len(program_dictionary[key])):
                     if len(rt) < len(program_dictionary[key][i]):
                         program_dictionary[key].insert(i, rt)
-
+                        return rt
+                program_dictionary[key].append(rt)
     return rt
 ###################################################################################################
 
@@ -153,7 +153,7 @@ def route(input, output):
         q_progress[last_action,] = 0
         last_action = next_step_index
 
-        if len(route) > max_tries:
+        if len(route) > max_tries or current_state() is None:
             return None
 
     print('Input:\n' + str(input))
@@ -170,7 +170,10 @@ def run_specific(base, method):
     return current_state()
 
 def run(base):
-    return run_specific(base, search(base))
+    r = []
+    for p in search(base):
+        r.append(run_specific(base, p))
+    return r
 
 ###################################################################################################
 
@@ -182,113 +185,60 @@ time_search = lambda input, iterations : timeit(lambda: run(input), number=itera
 ### KEY FROM INPUT
 def comparison_key(input):
     key = [len(input)]
-    for i in range(len(input)):
-        if input[i] == " " : key.append(i)
+    for i in list_types(input):
+        if(type(i) == 'list' or type(i) == 'dict'):
+            key.append(comparison_key(i))
+        else:
+            key.append(i)
     return tuple(key)
 ###################################################################################################
 
 ### FIND PREVIOUS PROGRAM
-list_types = lambda i : find_types(i) if isinstance(i, list) else type(i)
+list_types = lambda i : find_types(i) if isinstance(i, list) or isinstance(i, tuple) or isinstance(i, dict) else tuple([type(i)])
 def find_types(list):
     r = []
-    for i in list:
+    col = list.items() if isinstance(list, dict) else list
+    for i in col:
         r.append(list_types(i))
+    if len(r) > 1:
+        return tuple(r)
     return r
 
 def search(input):
     key = comparison_key(input)
     if key in program_dictionary:
-        return program_dictionary[key][0]
+        return program_dictionary[key]
 
     comparisons = []
     for k, li in program_dictionary.items():
+        s = key if len(key) < len(k) else k
+        matching_types = 0
+        for i in range(len(s)):
+            if key[i] == k[i]:
+                matching_types += 1
+        difference = abs(key[0] - k[0]) + abs(len(key) - len(k)) + len(key) - matching_types
         if isinstance(li[0], list):
             for p in li:
-                difference = abs(key[0] - k[0]) + abs(len(key) - len(k)) + len(key) - len(set(key).intersection(k))
                 if len(comparisons) < 1:
-                    comparisons.append([difference, p])
+                    comparisons.append([difference, p, k])
                 else:
                     for i in range(len(comparisons)):
                         if difference < comparisons[i][0]:
-                            comparisons.insert(i, [difference, p])
+                            comparisons.insert(i, [difference, p, k])
                             break
         else:
-            difference = abs(key[0] - k[0]) + abs(len(key) - len(k)) + len(key) - len(set(key).intersection(k))
             if len(comparisons) < 1:
-                comparisons.append([difference, li])
+                comparisons.append([difference, li, k])
             else:
                 for i in range(len(comparisons)):
                     if difference < comparisons[i][0]:
-                        comparisons.insert(i, [difference, li])
+                        comparisons.insert(i, [difference, li, k])
                         break
 
+
     for p in comparisons:
-        if run_specific(t[0], p[1]) != None:
-            return p[1]
+        if run_specific(input, p[1]) != None:
+            return program_dictionary[p[2]]
 
     return None
-###################################################################################################
-
-### RUN TESTS
-test_pairs = [
-    ['10017 10209 1523779635 22.3 61 data3', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
-    ['10017 10209 1523779635 22.3 61 data3 data4 17', [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3', 'data4', 17]]],
-    ['10017 10209 22.3 61', [10017, 10209, datetime.now(), [22.3,61]]],
-    ['#10017 10209 1523779635 22.3 61 data3', ['#10017', 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]],
-    ['id="10017" node_id="10209" datetime="1523779635" temp="22.3" humidity="61" label="data3"', [['id', 10017], ['node_id', 10209], ['datetime', datetime(2018, 4, 15, 10, 7, 15)], [['temp', 22.3], ['humidity', 61], ['label', 'data3']]]],
-    ['10017 10209 61', [10017, 10209, datetime.now(), [61]]],
-    ['id=10017 node=10209 datetime=180508 data=61', [10017, 10209, datetime(2018, 5, 8, 0, 0, 0), [61]]],
-]
-
-for i in range(len(test_pairs)):
-    print('Test[' + str(i + 1) + ']:')
-    train(test_pairs[i][0], test_pairs[i][1], 3000, num_methods)
-
-print()
-print('Testing programs:')
-for t in test_pairs:
-    print('Input:')
-    print(t[0])
-
-    program = search(t[0])
-
-    if program == None:
-        print('Program failure\n')
-        continue
-
-    print('Result:')
-    print(run(t[0]))
-    print('Program used:')
-    print(str(program) + ', ' + str(len(program)) + ' steps')
-    print('Time:')
-    print(str("%.2f" % (time_search(t[0], 10000) * 100000)) + 'us')
-    print()
-
-print('Final program dictionary:')
-print(program_dictionary)
-print()
-print('Test search:')
-try:
-    s_test = [
-    'id=10017 node=10209 datetime=180508 data=61',
-    'id=10234 node=10208 datetime=180507 data=72',
-    'id=10015 node=10209 datetime=180417 data=102',
-    'id=1002 node=102 datetime=160924 data=214',
-    '10017 10209 1523779635 22.3 61 data3',
-    '10019 10314 1523779635 19.4 52 dataX',
-    '100 1020 1523779635 21.42 67 data3 data4',
-    ]
-    for i in s_test:
-        print()
-        print('Input:')
-        print(str(i))
-        print('Result:')
-        print(run(i))
-        print('Program used:')
-        p = search(i)
-        print(str(p) + ', ' + str(len(p)) + ' steps')
-        print('Time:')
-        print(str("%.2f" % (time_search(i, 1000) * 100000)) + 'us')
-except TypeError:
-    print('No program found')
 ###################################################################################################
