@@ -1,13 +1,10 @@
 import dsl
 import numpy
-from datetime import datetime
 import editdistance # HAS TO BE INSTALLED SEPARATELY: pip3 install editdistance
-import time
-from timeit import default_timer as timer
 from timeit import timeit
-from collections import Counter
 
 ### SET UP GLOBAL VARIABLES
+agents = {}
 program_dictionary = {}
 num_methods = len(dsl.method)
 max_tries = 20
@@ -21,8 +18,8 @@ for i in range(num_methods):
 Q = numpy.zeros([num_methods, num_methods])
 g = 0.8
 
-input = '10017 10209 1523779635 22.3 61 data3'
-output = [10017, 10209, datetime(2018, 4, 15, 10, 7, 15), [22.3, 61, 'data3']]
+input = ''
+output = ''
 state = [input]
 
 def init(new_in, new_out):
