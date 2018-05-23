@@ -64,8 +64,7 @@ def pack_properties(packet, dict):
         return p
     return None
 
-def start():
-    return None
+start = lambda : None
 
 # DSL Method index
 method = [
