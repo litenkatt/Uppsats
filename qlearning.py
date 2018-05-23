@@ -36,12 +36,12 @@ sample_action = lambda i : int(numpy.random.choice(R[i], 1))
 ###################################################################################################
 
 ### CALCULATE LIKENESS OF A RESULT AND THE OUTPUT EXAMPLE
-compare = lambda r : 100 - editdistance.eval(str(r), str(output))
+compare = lambda r : editdistance.eval(str(r), str(output))
 def score(result):
     if result == output : return 100
     if result is None : return 0
     types = [list_types(result), list_types(output)]
-    s = compare(result) - editdistance.eval(str(types[0]), str(types[1])) / (len(types[0]) + len(types[1]))
+    s = 100 / ( compare(result) + editdistance.eval(str(types[0]), str(types[1])) / (len(types[0]) + len(types[1])))
     if s < 0 : return 0
     return s
 ###################################################################################################
@@ -55,10 +55,12 @@ def dsl_method(method):
         if len(attributes) == len(attribute_type) : break
         if i == 'int':
             attributes.append(3)
-            continue
 
-        for j in range(len(state) - 1, -1, -1):
-            if str(type(state[j])) == '<class \'' + str(i) + '\'>' and state[j] not in attributes : attributes.append(state[j])
+        else:
+            for j in range(len(state) - 1, -1, -1):
+                if str(type(state[j])) == '<class \'' + str(i) + '\'>' and state[j] not in attributes :
+                    attributes.append(state[j])
+                    break
 
     try:
         result = dsl.method[method][0](*attributes)
