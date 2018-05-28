@@ -47,3 +47,61 @@ test_contexts = {
             ['sensor1', 'sensor2']
     ],
 }
+
+
+actuators = {
+    'heater' : False,
+    'cooler' : False,
+}
+
+logic_sensors_s1 = {
+    'phone' : {
+        'pos' : 1000,
+    },
+    'temp' : {
+        'living_room' : 17,
+    }
+}
+
+logic_search_data = [
+    [
+        [
+            ['phone', 'pos'],
+            1000
+        ],
+        [
+            ['temp', 'living_room'],
+            17
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            1000
+        ],
+        [
+            ['temp', 'living_room'],
+            20
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            1500
+        ],
+        [
+            ['temp', 'living_room'],
+            17
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            1200
+        ],
+        [
+            ['temp', 'living_room'],
+            14
+        ],
+    ],
+]
