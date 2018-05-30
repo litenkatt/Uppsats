@@ -14,8 +14,8 @@ num_methods = len(test_data.actuators)
 max_tries = 20
 
 o = {
-    '<=': operator.le,
-    '>=': operator.ge,
+    '<': operator.lt,
+    '>': operator.gt,
 }
 
 
@@ -103,14 +103,14 @@ def build_prog(rt, new_in):
     p = [rt]
     p.append(abs((new_in[3] - new_in[2][1]) / (new_in[1] - new_in[0][1])))
     if new_in[1] - new_in[0][1] > 0:
-        p.append([new_in[0][1], '<='])
+        p.append([new_in[0][1], '<'])
     else:
-        p.append([new_in[0][1], '>='])
+        p.append([new_in[0][1], '>'])
 
     if new_in[3] - new_in[2][1] > 0:
-        p.append([new_in[3], '<='])
+        p.append([new_in[3], '<'])
     else:
-        p.append([new_in[3], '>='])
+        p.append([new_in[3], '>'])
 
     return p
 
@@ -202,7 +202,13 @@ def run_specific(i, method):
                     result = dsl_method(m)
                     state[result[0]] = result[1]
                 return state
-        except ZeroDivisionError: print('ZeroDivError')
+
+        except ZeroDivisionError:
+            if abs((method[3][0] - i[1][1]) / (1 + i[0][1])) >= method[1]:
+                for m in method[0]:
+                    result = dsl_method(m)
+                    state[result[0]] = result[1]
+                return state
 
     for m in method[0]:
         if m % 2 == 0:
