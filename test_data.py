@@ -167,22 +167,102 @@ logic_test_pairs = [
                 'cooler' : True
         }
     ],
+    [
+        [
+            [
+                [
+                    'rain',
+                    'window'
+                ],
+                0
+            ],
+            1,
+            [
+                [
+                    'temp',
+                    'living_room'
+                ],
+                25
+            ],
+            21
+        ],
+        {
+                'windows' : True
+        }
+    ],
 ]
 
 actuators = {
     'heater' : False,
     'cooler' : False,
+    'windows' : False,
 }
 
 logic_search_data = [
+
+    ### Scenario 1
+
     [
         [
             ['phone', 'pos'],
-            1000
+            0
         ],
         [
             ['temp', 'living_room'],
-            17
+            21
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            150
+        ],
+        [
+            ['temp', 'living_room'],
+            19
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            0
+        ],
+        [
+            ['temp', 'living_room'],
+            25
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            10
+        ],
+        [
+            ['temp', 'living_room'],
+            21
+        ],
+    ],
+
+    ### Scenario 2
+
+    [
+        [
+            ['phone', 'pos'],
+            10000
+        ],
+        [
+            ['temp', 'living_room'],
+            16
+        ],
+    ],
+    [
+        [
+            ['phone', 'pos'],
+            5000
+        ],
+        [
+            ['temp', 'living_room'],
+            15
         ],
     ],
     [
@@ -192,27 +272,60 @@ logic_search_data = [
         ],
         [
             ['temp', 'living_room'],
-            20
+            15
         ],
     ],
     [
         [
             ['phone', 'pos'],
-            1500
+            500
         ],
         [
             ['temp', 'living_room'],
-            17
+            21
+        ],
+    ],
+
+    ### Scenario 3
+
+    [
+        [
+            ['rain', 'window'],
+            0
+        ],
+        [
+            ['temp', 'living_room'],
+            21
         ],
     ],
     [
         [
-            ['phone', 'pos'],
-            1200
+            ['rain', 'window'],
+            1
         ],
         [
             ['temp', 'living_room'],
-            14
+            24
+        ],
+    ],
+    [
+        [
+            ['rain', 'window'],
+            0
+        ],
+        [
+            ['temp', 'living_room'],
+            25
+        ],
+    ],
+    [
+        [
+            ['rain', 'window'],
+            0
+        ],
+        [
+            ['temp', 'living_room'],
+            19
         ],
     ],
 ]
