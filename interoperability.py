@@ -1,4 +1,4 @@
-import dsl
+import interoperability_dsl as dsl
 import numpy
 import editdistance # HAS TO BE INSTALLED SEPARATELY: pip3 install editdistance
 from timeit import timeit

@@ -6,7 +6,7 @@ import copy
 from datetime import datetime
 from collections import Counter
 
-sensor_agents = test_data.sensor_agents
+sensor_agents = test_data.clustering_sensors
 
 # SORT :: [Sensor_agent] -> Integer -> [Sensor_agent]
 # Given a list xc and int i returns xc sorted according to i

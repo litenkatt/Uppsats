@@ -69,8 +69,6 @@ start = lambda : None
 # DSL Method index
 method = [
     [start, [None], None],
-    [take, ['list', 'int'], 'list'],
-    [drop, ['list', 'int'], 'list'],
     [pack_payload, ['list'], 'list'],
     [extract_packet, ['dict'], 'list'],
     [pack_properties, ['list', 'dict'], 'list'],
