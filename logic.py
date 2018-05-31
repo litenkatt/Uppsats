@@ -151,6 +151,10 @@ def train(new_in, new_out, iterations, max_steps):
         else:
             if rt not in program_dictionary[key]:
                 program_dictionary[key].append(rt)
+
+    for p in range(len(actuator_keys)):
+        if p % 2 == 0:
+            dsl_method(p)
     return rt
 ###################################################################################################
 
@@ -195,7 +199,6 @@ def route(input, output):
 def run_specific(i, method):
     init(i, None)
     if o[method[3][1]](i[1][1], method[3][0]):
-        #if o[method[2][1]](i[0][1], method[2][0]):
         try:
             if abs((method[3][0] - i[1][1]) / (i[0][1])) >= method[1]:
                 for m in method[0]:
