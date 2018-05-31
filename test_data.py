@@ -29,11 +29,17 @@ interop_test_pairs = [
     ],
 ]
 
+interop_search_data = [
+    ['PUBLISH', False, 1, False, -1, -1, 'test/mqtt_standard/1', 1234, -1, 'property1', 'property2', {'payload 1':123, 'payload2':456}],
+    {'command':'PUBLISH', 'mid':1234, 'qos':0, 'pos':0, 'to_process':-1, 'packet':
+        ['PUBLISH', False, 1, False, -1, -1, 'test/gmqtt/1', 1234, ['Test payload', 'Payload 2']], 'info':['property1', 'property2', 'property3', 'property4']},
+]
+
 ###################################################################################################
 
-### Clustering
+### Context sensing diversity
 
-clustering_sensors = {
+csd_sensors = {
     'sensor1' : {
         'temp' : 20.3,
         'time' : dt(2018, 5, 20, 10, 0, 0),
@@ -51,7 +57,7 @@ clustering_sensors = {
     }
 }
 
-clustering_contexts = {
+csd_contexts = {
     'c1' : [
             'loc',
             {
@@ -81,7 +87,7 @@ clustering_contexts = {
     ],
 }
 
-clustering_test_pairs = [
+csd_test_pairs = [
     [
         [
             {
@@ -91,7 +97,7 @@ clustering_test_pairs = [
                     'loc' : 'Kista'
                 }
             },
-            clustering_contexts
+            csd_contexts
         ],
         {
             'c1': [
@@ -113,6 +119,19 @@ clustering_test_pairs = [
                 ['sensor1', 'sensor2', 'sensor101']
             ],
         }
+    ],
+]
+
+csd_search_data = [
+    [
+        {
+            'sensor101' : {
+                'temp' : 26.4,
+                'time' : dt(2018, 5, 20, 10, 0, 0),
+                'loc' : 'Kista'
+            }
+        },
+        csd_contexts
     ],
 ]
 
