@@ -1,4 +1,4 @@
-import clustering_dsl
+import csd_dsl
 import test_data
 import numpy
 import editdistance # HAS TO BE INSTALLED SEPARATELY: pip3 install editdistance
@@ -7,7 +7,7 @@ import copy
 
 ### SET UP GLOBAL VARIABLES
 program_dictionary = {}
-num_methods = len(clustering_dsl.method)
+num_methods = len(csd_dsl.method)
 max_tries = 20
 
 R = []
@@ -15,7 +15,7 @@ for i in range(num_methods):
     R.append([])
     for j in range(num_methods):
         if i != num_methods - 1:
-            if i != j and (clustering_dsl.method[i][2] == clustering_dsl.method[j][1][0] or i == 0): R[i].append(j)
+            if i != j and (csd_dsl.method[i][2] == csd_dsl.method[j][1][0] or i == 0): R[i].append(j)
         else:
             R[i] = [0]
 
@@ -52,7 +52,7 @@ def score(result):
 
 ### RUN A SINGLE METHOD FROM THE DSL AND RETURN THE RESULT
 def dsl_method(method):
-    attribute_type = [*clustering_dsl.method[method][1]]
+    attribute_type = [*csd_dsl.method[method][1]]
     attributes = []
 
     for i in attribute_type:
@@ -66,7 +66,7 @@ def dsl_method(method):
                     break
 
     try:
-        result = clustering_dsl.method[method][0](*attributes)
+        result = csd_dsl.method[method][0](*attributes)
         state.append(result)
         return result
     except TypeError:

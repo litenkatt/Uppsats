@@ -1,12 +1,11 @@
 import test_data
 import math
-import numpy as np
 import editdistance
 import copy
 from datetime import datetime
 from collections import Counter
 
-sensor_agents = test_data.clustering_sensors
+sensor_agents = test_data.csd_sensors
 
 # SORT :: [Sensor_agent] -> Integer -> [Sensor_agent]
 # Given a list xc and int i returns xc sorted according to i
