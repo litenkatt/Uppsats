@@ -3,36 +3,40 @@ from datetime import datetime as dt
 ### INTEROPERABILITY
 
 interop_test_pairs = [
-    [   # 1: gmqtt without mid-> MQTT Standard
+    [   # 1: Eclipse Paho Python -> gmqtt
+        {'command':'PUBLISH', 'mid':1234, 'qos':0, 'pos':0, 'to_process':9, 'packet':['PUBLISH', False, 0, False, 4, 30, 'test/gmqtt/eclipse_paho_python', 1234, 'Test data for learning'], 'info':'This message will be translated into gmqtt format'},
+        ['PUBLISH', False, 0, False, 4, 30, 'test/gmqtt/eclipse_paho_python', 1234, [1, 'This message will be translated into gmqtt format', 'Test data for learning']]
+    ],
+    [   # 2: gmqtt -> Eclipse Paho Python
+        ['PUBLISH', False, 1, False, 6, 30, 'test/eclipse_paho_python/gmqtt', 5678, 1, 'This message will be translated into Eclipse Paho Python format', 'Test data for learning'],
+        {'command':'PUBLISH', 'mid':5678, 'qos':1, 'pos':0, 'to_process':9, 'packet':['PUBLISH', False, 1, False, 6, 30, 'test/eclipse_paho_python/gmqtt', 5678, 'Test data for learning'], 'info':[1, 'This message will be translated into Eclipse Paho Python format']}
+    ],
+]
+
+interop_extra_pairs = [
+    [   # gmqtt without mid-> MQTT Standard
         ['PUBLISH', False, 0, False, -1, -1, 'test/mqtt_standard/1', -1, 'property1', 'property2', 'Test payload'],
         ['PUBLISH', False, 0, False, -1, -1, 'test/mqtt_standard/1', [-1, 'property1', 'property2', 'Test payload']]
     ],
-    [   # 2: gmqtt with mid -> MQTT Standard
+    [   # gmqtt with mid -> MQTT Standard
         ['PUBLISH', False, 1, False, -1, -1, 'test/mqtt_standard/2', 1234, -1, 'property1', 'property2', 'Test payload'],
         ['PUBLISH', False, 1, False, -1, -1, 'test/mqtt_standard/2', 1234, [-1, 'property1', 'property2', 'Test payload']]
     ],
-    [   # 3: Eclipse Paho Python -> MQTT Standard
+    [   # Eclipse Paho Python -> MQTT Standard
         {'command':'PUBLISH', 'mid':1234, 'qos':0, 'pos':0, 'to_process':-1, 'packet':['PUBLISH', False, 1, False, -1, -1, 'test/mqtt_standard/3', 1234, 'Test payload'], 'info':'property1'},
         ['PUBLISH', False, 1, False, -1, -1, 'test/mqtt_standard/3', 1234, 'Test payload']
     ],
-    [   # 4: Eclipse Paho Python -> gmqtt
-        {'command':'PUBLISH', 'mid':1234, 'qos':0, 'pos':0, 'to_process':-1, 'packet':['PUBLISH', False, 1, False, -1, -1, 'test/gmqtt/1', 1234, 'Test payload'], 'info':'property1'},
-        ['PUBLISH', False, 1, False, -1, -1, 'test/gmqtt/1', 1234, [-1, 'property1', 'Test payload']]
-    ],
-    [   # 5: MQTT Standard -> Eclipse Paho Python
+    [   # MQTT Standard -> Eclipse Paho Python
         ['PUBLISH', False, 1, False, -1, -1, 'test/eclipse_paho_python/1', 1234, 'Test payload'],
         {'command':'PUBLISH', 'mid':1234, 'qos':1, 'pos':0, 'to_process':9, 'packet':['PUBLISH', False, 1, False, -1, -1, 'test/eclipse_paho_python/1', 1234, 'Test payload'], 'info':''}
-    ],
-    [   # 6: gmqtt -> Eclipse Paho Python
-        ['PUBLISH', False, 1, False, -1, -1, 'test/eclipse_paho_python/1', 1234, -1, 'property1', 'Test payload'],
-        {'command':'PUBLISH', 'mid':1234, 'qos':1, 'pos':0, 'to_process':9, 'packet':['PUBLISH', False, 1, False, -1, -1, 'test/eclipse_paho_python/1', 1234, 'Test payload'], 'info':[-1, 'property1']}
     ],
 ]
 
 interop_search_data = [
-    ['PUBLISH', False, 1, False, -1, -1, 'test/mqtt_standard/1', 1234, -1, 'property1', 'property2', {'payload 1':123, 'payload2':456}],
-    {'command':'PUBLISH', 'mid':1234, 'qos':0, 'pos':0, 'to_process':-1, 'packet':
-        ['PUBLISH', False, 1, False, -1, -1, 'test/gmqtt/1', 1234, ['Test payload', 'Payload 2']], 'info':['property1', 'property2', 'property3', 'property4']},
+    {'command':'PUBLISH', 'mid':9012, 'qos':0, 'pos':0, 'to_process':9, 'packet':
+        ['PUBLISH', False, 1, False, 4, 11, 'test/paho/1', 9012, ['Payload part 1', 'Payload part 2']], 'info':['property1', 'property2', 'property3', 'property4']},
+    ['PUBLISH', False, 1, False, 7, 12, 'test/gmqtt/1', 3456, 2, 'property1', 'property2', {'payload part 1':123, 'payload part 2':456}],
+    ['Erroneous input']
 ]
 
 ###################################################################################################
@@ -54,6 +58,16 @@ csd_sensors = {
         'temp' : 26.4,
         'time' : dt(2018, 5, 20, 10, 0, 0),
         'loc' : 'Kista'
+    },
+    'sensor102' : {
+        'temp' : 28.1,
+        'time' : dt(2018, 5, 20, 10, 0, 0),
+        'loc' : 'Kista'
+    },
+    'sensor103' : {
+        'temp' : 28.1,
+        'time' : dt(2018, 5, 20, 10, 0, 0),
+        'loc' : 'Bromma'
     }
 }
 
@@ -100,23 +114,37 @@ csd_test_pairs = [
             csd_contexts
         ],
         {
-            'c1': [
-                'loc',
-                {
-                    'loc': [2, 0.0, 'Kista'],
-                    'temp': [2, 3.049999999999999, 23.35],
-                    'time': [2, 18000.0, dt(2018, 5, 20, 5, 0)]
-                },
-                ['sensor1', 'sensor101']
+            'c1' : [
+                    'loc',
+                    {
+                        'loc' : [1, 0, 'Kista'],
+                        'temp' : [1, 0, 20.3],
+                        'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],
+                    },
+                    ['sensor1',]
             ],
-            'c3': [
-                'time',
-                {
-                    'loc': [3, 2.309401076758503, 'Kista'],
-                    'temp': [3, 2.734755727462488, 22.133333333333336],
-                    'time': [3, 0.0, dt(2018, 5, 20, 10, 0)],
-                },
-                ['sensor1', 'sensor2', 'sensor101']
+        }
+    ],
+    [
+        [
+            {
+                'sensor101' : {
+                    'temp' : 26.4,
+                    'time' : dt(2018, 5, 20, 10, 0, 0),
+                    'loc' : 'Kista'
+                }
+            },
+            csd_contexts
+        ],
+        {
+            'c3' : [
+                    'time',
+                    {
+                        'loc' : [2, 2.82842712, 'Kista'],
+                        'time' : [2, 0, dt(2018, 5, 20, 10, 0, 0)],
+                        'temp' : [2, 0.31819805, 20,75],
+                    },
+                    ['sensor1', 'sensor2']
             ],
         }
     ],
@@ -125,10 +153,20 @@ csd_test_pairs = [
 csd_search_data = [
     [
         {
-            'sensor101' : {
-                'temp' : 26.4,
-                'time' : dt(2018, 5, 20, 10, 0, 0),
+            'sensor102' : {
+                'temp' : 19.2,
+                'time' : dt(2018, 5, 27, 10, 0, 0),
                 'loc' : 'Kista'
+            }
+        },
+        csd_contexts
+    ],
+    [
+        {
+            'sensor103' : {
+                'temp' : 28.1,
+                'time' : dt(2018, 5, 20, 10, 0, 0),
+                'loc' : 'Bromma'
             }
         },
         csd_contexts
@@ -186,6 +224,9 @@ logic_test_pairs = [
                 'cooler' : True
         }
     ],
+]
+
+window_test_pair = [
     [
         [
             [
@@ -224,21 +265,21 @@ logic_search_data = [
     [
         [
             ['phone', 'pos'],
-            0
+            2000
         ],
         [
             ['temp', 'living_room'],
-            21
+            18
         ],
     ],
     [
         [
             ['phone', 'pos'],
-            150
+            1200
         ],
         [
             ['temp', 'living_room'],
-            19
+            16
         ],
     ],
     [
@@ -251,16 +292,9 @@ logic_search_data = [
             25
         ],
     ],
-    [
-        [
-            ['phone', 'pos'],
-            10
-        ],
-        [
-            ['temp', 'living_room'],
-            21
-        ],
-    ],
+]
+
+bonus_scenarios = [
 
     ### Scenario 2
 

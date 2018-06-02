@@ -15,7 +15,7 @@ for i in range(num_methods):
     R.append([])
     for j in range(num_methods):
         if i != num_methods - 1:
-            if i != j and (csd_dsl.method[i][2] == csd_dsl.method[j][1][0] or i == 0): R[i].append(j)
+            if i != j and j != num_methods - 1 and (csd_dsl.method[i][2] == csd_dsl.method[j][1][0] or i == 0): R[i].append(j)
         else:
             R[i] = [0]
 
@@ -104,13 +104,14 @@ def train(new_in, new_out, iterations, max_steps):
         for j in range(max_steps):
                 next_action = sample_action(last_action)
                 if update(last_action, next_action, g) == -1: break
+                #if next_action == num_methods - 1: break
                 last_action = next_action
 
     Q = Q / numpy.max(Q) * 100
 
     for i in range(len(Q)):
         for j in range(len(Q)):
-            Q[i][j] = "%.2f" % Q[i][j]
+            Q[i][j] = format(Q[i][j], '.2f')#("%.2f" % Q[i][j])
 
     print("Trained Q matrix:")
     print(Q)
@@ -160,6 +161,13 @@ def route(input, output):
         if len(route) > max_tries or current_state() is None:
             return None
 
+    if num_methods - 3 not in route:
+        state.append(dsl_method(num_methods-3))
+        route.append(num_methods-3)
+
+    state.append(dsl_method(num_methods-1))
+    route.append(num_methods-1)
+
     print('Input:\n' + str(input))
     print('Selected path:\n' + str(route))
     print('Result:\n' + str(current_state()) + '\n')
@@ -178,7 +186,7 @@ def run(base):
     r = []
     for p in search(base):
         r.append(run_specific(base, p))
-
+    #r.append(run_specific(base, search(base)[0]))
     return r
 
 ###################################################################################################
@@ -190,6 +198,25 @@ time_search = lambda input, iterations : timeit(lambda: run(input), number=itera
 
 ### KEY FROM INPUT
 def comparison_key(input):
+    #key = [0,[],[]]
+    #print(input)
+    #for sk, sv in input[0].items():
+    #        for tk, tv in sv.items():
+    #            key[0] += 1
+    #            key[1].append(tk)
+
+    #if result == None:
+    #    for k, v in input[1].items():
+    #        key[2].append(k)
+    #else:
+    #    for k, v in result.items():
+    #        key[2].append(k)
+
+    #print(key)
+    #key[1] = tuple(key[1])
+    #key[2] = tuple(key[2])
+    #return tuple(key)
+
     key = [len(input)]
     for i in list_types(input):
         if(type(i) == 'list' or type(i) == 'dict'):
@@ -214,6 +241,7 @@ def find_types(list):
 def search(input):
     key = comparison_key(input[0])
     if key in program_dictionary:
+        #print(program_dictionary[key])
         return program_dictionary[key]
 
     comparisons = []
@@ -248,20 +276,4 @@ def search(input):
             return program_dictionary[p[2]]
 
     return None
-###################################################################################################
-
-### CONTEXT SENSING DIVERSITY
-
-def csd(context):
-    ret = copy.deepcopy(context)
-    agents = test_data.sensor_agents
-    values = []
-
-    for v in context[1]:
-        if v in agents[a]:
-                if isinstance(context[1][v][2], int) or isinstance(context[1][v][2], float):
-                    if v < (avg[2] - avg[1]) or (avg[2] + avg[1]) < v:
-                        break
-
-
 ###################################################################################################

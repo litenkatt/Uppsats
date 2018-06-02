@@ -1,7 +1,5 @@
 # MQTT convert
 mqtt_packet = ['command', 'dup', 'qos', 'retain', 'remaining_length', 'topic_length', 'topic', 'mid', 'payload']
-epp_labels = ['command', 'mid', 'qos', 'pos', 'to_process', 'packet', 'info']
-epp_keys = [['command', 'qos', 'mid'], ['pos', 'to_process', 'packet', 'info']]
 
 # TAKE :: int -> [String] -> [String]
 # Given an integer n and array xs, returns the array truncated after the (n+1)-st element.
@@ -60,7 +58,11 @@ def extract_packet(dict):
 def pack_properties(packet, dict):
     p = packet.copy()
     if 'info' in dict:
-        p[-1] = [-1, dict['info'], p[-1]]
+        if type(dict['info']) == 'list' or type(dict['info']) == 'dict':
+            le = len(dict['info'])
+        else:
+            le = 1
+        p[-1] = [le, dict['info'], p[-1]]
         return p
     return None
 
