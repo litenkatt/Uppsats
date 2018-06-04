@@ -4,11 +4,15 @@ from datetime import datetime as dt
 
 interop_test_pairs = [
     [   # 1: Eclipse Paho Python -> gmqtt
+        #Eclipse Paho Python
         {'command':'PUBLISH', 'mid':1234, 'qos':0, 'pos':0, 'to_process':9, 'packet':['PUBLISH', False, 0, False, 4, 30, 'test/gmqtt/eclipse_paho_python', 1234, 'Test data for learning'], 'info':'This message will be translated into gmqtt format'},
+        #gmqtt
         ['PUBLISH', False, 0, False, 4, 30, 'test/gmqtt/eclipse_paho_python', 1234, [1, 'This message will be translated into gmqtt format', 'Test data for learning']]
     ],
     [   # 2: gmqtt -> Eclipse Paho Python
+        #gmqtt
         ['PUBLISH', False, 1, False, 6, 30, 'test/eclipse_paho_python/gmqtt', 5678, 1, 'This message will be translated into Eclipse Paho Python format', 'Test data for learning'],
+        #Eclipse Paho Python
         {'command':'PUBLISH', 'mid':5678, 'qos':1, 'pos':0, 'to_process':9, 'packet':['PUBLISH', False, 1, False, 6, 30, 'test/eclipse_paho_python/gmqtt', 5678, 'Test data for learning'], 'info':[1, 'This message will be translated into Eclipse Paho Python format']}
     ],
 ]
@@ -72,103 +76,70 @@ csd_sensors = {
 }
 
 csd_contexts = {
-    'c1' : [
-            'loc',
-            {
+    'c1' : ['loc',{
                 'loc' : [1, 0, 'Kista'],
                 'temp' : [1, 0, 20.3],
-                'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],
-            },
+                'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],},
             ['sensor1',]
     ],
-    'c2' : [
-            'loc',
-            {
+    'c2' : ['loc',{
                 'loc' : [1, 0, 'Solna'],
                 'temp' : [1, 0, 21.2],
-                'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],
-            },
+                'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],},
             ['sensor2',]
     ],
-    'c3' : [
-            'time',
-            {
+    'c3' : ['time',{
                 'loc' : [2, 2.82842712, 'Kista'],
                 'time' : [2, 0, dt(2018, 5, 20, 10, 0, 0)],
-                'temp' : [2, 0.31819805, 20,75],
-            },
+                'temp' : [2, 0.31819805, 20,75],},
             ['sensor1', 'sensor2']
     ],
 }
 
 csd_test_pairs = [
     [
-        [
-            {
-                'sensor101' : {
-                    'temp' : 26.4,
-                    'time' : dt(2018, 5, 20, 10, 0, 0),
-                    'loc' : 'Kista'
-                }
-            },
+        [{'sensor101' : {
+                'temp' : 26.4,
+                'time' : dt(2018, 5, 20, 10, 0, 0),
+                'loc' : 'Kista'}},
             csd_contexts
         ],
-        {
-            'c1' : [
-                    'loc',
-                    {
-                        'loc' : [1, 0, 'Kista'],
-                        'temp' : [1, 0, 20.3],
-                        'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],
-                    },
-                    ['sensor1',]
-            ],
-        }
+        {'c1' : [
+                'loc',{
+                    'loc' : [1, 0, 'Kista'],
+                    'temp' : [1, 0, 20.3],
+                    'time' : [1, 0, dt(2018, 5, 20, 0, 0, 0)],},
+                ['sensor1',]],}
     ],
     [
-        [
-            {
-                'sensor101' : {
-                    'temp' : 26.4,
-                    'time' : dt(2018, 5, 20, 10, 0, 0),
-                    'loc' : 'Kista'
-                }
-            },
+        [{'sensor101' : {
+                'temp' : 26.4,
+                'time' : dt(2018, 5, 20, 10, 0, 0),
+                'loc' : 'Kista'}},
             csd_contexts
         ],
-        {
-            'c3' : [
-                    'time',
-                    {
+        {'c3' : [
+                    'time',{
                         'loc' : [2, 2.82842712, 'Kista'],
                         'time' : [2, 0, dt(2018, 5, 20, 10, 0, 0)],
-                        'temp' : [2, 0.31819805, 20,75],
-                    },
-                    ['sensor1', 'sensor2']
-            ],
-        }
+                        'temp' : [2, 0.31819805, 20,75],},
+                    ['sensor1', 'sensor2']],}
     ],
 ]
 
 csd_search_data = [
     [
-        {
-            'sensor102' : {
+        {'sensor102' : {
                 'temp' : 19.2,
                 'time' : dt(2018, 5, 27, 10, 0, 0),
-                'loc' : 'Kista'
-            }
-        },
+                'loc' : 'Kista'}},
         csd_contexts
     ],
     [
-        {
-            'sensor103' : {
+        {'sensor103' : {
                 'temp' : 28.1,
                 'time' : dt(2018, 5, 20, 10, 0, 0),
-                'loc' : 'Bromma'
-            }
-        },
+                'loc' : 'Bromma'}},
         csd_contexts
     ],
 ]
@@ -179,54 +150,30 @@ csd_search_data = [
 
 logic_test_pairs = [
     [
+        # Sample input
         [
-            [
-                [
-                    'phone',
-                    'pos'
-                ],
-                1000
-            ],
-            0,
-            [
-                [
-                    'temp',
-                    'living_room'
-                ],
-                17
-            ],
-            21
+            [['phone', 'pos'],1000],0,
+            [['temp', 'living_room'],17],21
         ],
+        # Sample output
         {
                 'heater' : True
         }
     ],
     [
+        # Sample input
         [
-            [
-                [
-                    'phone',
-                    'pos'
-                ],
-                1000
-            ],
-            0,
-            [
-                [
-                    'temp',
-                    'living_room'
-                ],
-                25
-            ],
-            21
+            [['phone','pos'],1000],0,
+            [['temp','living_room'],25],21
         ],
+        #Sample output
         {
                 'cooler' : True
         }
     ],
 ]
 
-window_test_pair = [
+bonus_test_pair = [
     [
         [
             [
@@ -263,34 +210,16 @@ logic_search_data = [
     ### Scenario 1
 
     [
-        [
-            ['phone', 'pos'],
-            2000
-        ],
-        [
-            ['temp', 'living_room'],
-            18
-        ],
+        [['phone', 'pos'],2000],
+        [['temp', 'living_room'],18],
     ],
     [
-        [
-            ['phone', 'pos'],
-            1200
-        ],
-        [
-            ['temp', 'living_room'],
-            16
-        ],
+        [['phone', 'pos'],1200],
+        [['temp', 'living_room'],16],
     ],
     [
-        [
-            ['phone', 'pos'],
-            0
-        ],
-        [
-            ['temp', 'living_room'],
-            25
-        ],
+        [['phone', 'pos'],0],
+        [['temp', 'living_room'],25],
     ],
 ]
 
